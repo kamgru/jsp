@@ -112,7 +112,7 @@ Token getNextToken(Cursor &cursor) {
     return { cursor.getIndex(), 0, UNKNOWN };
 }
 
-std::unique_ptr<std::vector<Token>> Lexer::scan(const std::string &input) {
+std::unique_ptr<std::vector<Token>> Scanner::scan(const std::string &input) {
     Cursor cursor(input);
     auto tokens = std::make_unique<std::vector<Token>>();
     do {

@@ -24,13 +24,14 @@ namespace jsp {
     class Token {
     public:
         Token(unsigned int index, unsigned int length, TOKEN_TYPE tokenType)
-            : index(index), length(length), tokenType(tokenType) {}
+                : index(index), length(length), tokenType(tokenType) {}
+
         const unsigned int index;
         const unsigned int length;
         const TOKEN_TYPE tokenType;
     };
 
-    class Lexer{
+    class Scanner {
     public:
         std::unique_ptr<std::vector<Token>> scan(std::string const &input);
     };

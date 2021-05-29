@@ -1,3 +1,3 @@
 add_executable(all_tests
-        LexerTests.cpp)
+        ScannerTests.cpp)
 target_link_libraries(all_tests jsp)
