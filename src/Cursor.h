@@ -9,6 +9,7 @@ namespace jsp {
     public:
         Cursor(std::string const &input);
         bool advance();
+        bool offset(unsigned int value);
         char getValue();
         unsigned int getIndex();
         char peekNextValue();

@@ -28,3 +28,8 @@ char Cursor::peekNextValue() {
 
     return '\0';
 }
+
+bool Cursor::offset(unsigned int value) {
+    m_index += value;
+    return m_index + value > m_input.length();
+}

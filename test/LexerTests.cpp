@@ -74,3 +74,67 @@ TEST_CASE("check simple string value") {
     CHECK(result.tokenType == jsp::VALUE_STRING);
 }
 
+TEST_CASE("check integer value") {
+
+    const std::string json = R"(1234)";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::VALUE_NUMBER);
+    CHECK(result.index == 0);
+    CHECK(result.length == 4);
+}
+
+TEST_CASE("check decimal value") {
+
+    const std::string json = R"(12.34)";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::VALUE_NUMBER);
+    CHECK(result.index == 0);
+    CHECK(result.length == 5);
+}
+
+TEST_CASE("check negative decimal value") {
+
+    const std::string json = R"(-12.34)";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::VALUE_NUMBER);
+    CHECK(result.index == 0);
+    CHECK(result.length == 6);
+}
+
+TEST_CASE("check negative decimal scientific notation value") {
+
+    const std::string json = R"(-12.34e+2)";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::VALUE_NUMBER);
+    CHECK(result.index == 0);
+    CHECK(result.length == 5);
+}
+
+TEST_CASE("check null value") {
+
+    const std::string json = R"(null)";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::VALUE_NULL);
+    CHECK(result.index == 0);
+    CHECK(result.length == 4);
+}
