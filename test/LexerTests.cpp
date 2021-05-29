@@ -123,7 +123,7 @@ TEST_CASE("check negative decimal scientific notation value") {
     jsp::Token result = tokens->at(0);
     CHECK(result.tokenType == jsp::VALUE_NUMBER);
     CHECK(result.index == 0);
-    CHECK(result.length == 5);
+    CHECK(result.length == 9);
 }
 
 TEST_CASE("check null value") {
