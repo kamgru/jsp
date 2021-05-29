@@ -4,31 +4,23 @@
 
 using namespace jsp;
 
-Token getObjectStartToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 1, OBJECT_BEGIN };
-    cursor.advance();
-    return token;
+Token getObjectStartToken(Cursor &cursor) {
+    return { cursor.getIndex(), 1, OBJECT_BEGIN };
 }
 
-Token getObjectEndToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 1, OBJECT_END };
-    cursor.advance();
-    return token;
+Token getObjectEndToken(Cursor &cursor) {
+    return { cursor.getIndex(), 1, OBJECT_END };
 }
 
-Token getArrayStartToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 1, ARRAY_BEGIN };
-    cursor.advance();
-    return token;
+Token getArrayStartToken(Cursor &cursor) {
+    return { cursor.getIndex(), 1, ARRAY_BEGIN };
 }
 
-Token getArrayEndToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 1, ARRAY_END };
-    cursor.advance();
-    return token;
+Token getArrayEndToken(Cursor &cursor) {
+    return { cursor.getIndex(), 1, ARRAY_END };
 }
 
-Token getStringToken(Cursor& cursor) {
+Token getStringToken(Cursor &cursor) {
     unsigned int currentIndex = cursor.getIndex();
     unsigned int length = 0;
     char currentValue = cursor.getValue();
@@ -63,38 +55,40 @@ bool isJsonNumberChar(char value) {
            || value == '.';
 }
 
-Token getNumberToken(Cursor& cursor) {
+Token getNumberToken(Cursor &cursor) {
     unsigned int startIndex = cursor.getIndex();
 
-    while (cursor.advance()) {
+    do {
         char currentValue = cursor.getValue();
         if (!std::isdigit(currentValue) && !isJsonNumberChar(currentValue)) {
             break;
         }
-    }
+    } while (cursor.advance());
 
-    return { startIndex, cursor.getIndex() - startIndex, VALUE_NUMBER };
+    cursor.rewind();
+
+    return { startIndex, cursor.getIndex() - startIndex + 1, VALUE_NUMBER };
 }
 
-Token getNullToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 4, VALUE_NULL };
+Token getNullToken(Cursor &cursor) {
+    Token token { cursor.getIndex(), 4, LITERAL_NULL };
     cursor.offset(4);
     return token;
 }
 
-Token getTrueToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 4, VALUE_TRUE };
+Token getTrueToken(Cursor &cursor) {
+    Token token { cursor.getIndex(), 4, LITERAL_TRUE };
     cursor.offset(4);
     return token;
 }
 
-Token getFalseToken(Cursor& cursor) {
-    Token token { cursor.getIndex(), 4, VALUE_FALSE };
+Token getFalseToken(Cursor &cursor) {
+    Token token { cursor.getIndex(), 5, LITERAL_FALSE };
     cursor.offset(5);
     return token;
 }
 
-Token getNextToken(Cursor& cursor) {
+Token getNextToken(Cursor &cursor) {
     char currentValue = cursor.getValue();
 
     switch (currentValue) {
@@ -106,9 +100,9 @@ Token getNextToken(Cursor& cursor) {
         case 'n':
         case 'N':return getNullToken(cursor);
         case 'f':
-        case 'F': return getFalseToken(cursor);
+        case 'F':return getFalseToken(cursor);
         case 't':
-        case 'T': return getTrueToken(cursor);
+        case 'T':return getTrueToken(cursor);
     }
 
     if (std::isdigit(currentValue) || isJsonNumberChar(currentValue)) {
@@ -118,16 +112,15 @@ Token getNextToken(Cursor& cursor) {
     return { cursor.getIndex(), 0, UNKNOWN };
 }
 
-std::unique_ptr<std::vector<Token>> Lexer::scan(const std::string& input) {
+std::unique_ptr<std::vector<Token>> Lexer::scan(const std::string &input) {
     Cursor cursor(input);
     auto tokens = std::make_unique<std::vector<Token>>();
     do {
 
-        if (cursor.getValue() == ' ') {
-            continue;
-        }
-
-        if (cursor.getValue() == ':') {
+        char currentValue = cursor.getValue();
+        if (currentValue == ' '
+            || currentValue == ':'
+            || currentValue == ',') {
             continue;
         }
 

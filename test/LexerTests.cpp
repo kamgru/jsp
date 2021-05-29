@@ -1,4 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
 #include "doctest.h"
 #include "../include/jsp.h"
 #include <string>
@@ -126,15 +127,124 @@ TEST_CASE("check negative decimal scientific notation value") {
     CHECK(result.length == 9);
 }
 
-TEST_CASE("check null value") {
+TEST_CASE("check null literal") {
 
-    const std::string json = R"(null)";
+    std::string json;
+    SUBCASE("null") { json = "null"; }
+    SUBCASE("NULL") { json = "NULL"; }
+    SUBCASE("nUlL") { json = "nUlL"; }
+    SUBCASE("Null") { json = "Null"; }
+    CAPTURE(json);
+
     auto tokens = lexer.scan(json);
 
     REQUIRE(tokens->size() == 1);
 
     jsp::Token result = tokens->at(0);
-    CHECK(result.tokenType == jsp::VALUE_NULL);
+    CHECK(result.tokenType == jsp::LITERAL_NULL);
     CHECK(result.index == 0);
     CHECK(result.length == 4);
+}
+
+TEST_CASE("check true literal") {
+
+    std::string json;
+
+    SUBCASE("true") { json = "true"; }
+    SUBCASE("TRUE") { json = "TRUE"; }
+    SUBCASE("True") { json = "True"; }
+    SUBCASE("tRuE") { json = "tRuE"; }
+    CAPTURE(json);
+
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::LITERAL_TRUE);
+    CHECK(result.index == 0);
+    CHECK(result.length == 4);
+}
+
+TEST_CASE("check false literal") {
+
+    std::string json;
+
+    SUBCASE("false") { json = "false"; }
+    SUBCASE("FALSE") { json = "FALSE"; }
+    SUBCASE("False") { json = "False"; }
+    SUBCASE("fAlSe") { json = "fAlSe"; }
+    CAPTURE(json);
+
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 1);
+
+    jsp::Token result = tokens->at(0);
+    CHECK(result.tokenType == jsp::LITERAL_FALSE);
+    CHECK(result.index == 0);
+    CHECK(result.length == 5);
+}
+
+TEST_CASE("check array of objects") {
+
+    const std::string json = R"([{},{},{}])";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 8);
+    CHECK(tokens->at(0).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(1).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(2).tokenType == jsp::OBJECT_END);
+    CHECK(tokens->at(3).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(4).tokenType == jsp::OBJECT_END);
+    CHECK(tokens->at(5).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(6).tokenType == jsp::OBJECT_END);
+    CHECK(tokens->at(7).tokenType == jsp::ARRAY_END);
+}
+
+TEST_CASE("check object with array") {
+
+    const std::string json = R"({"arr":[1, 2, 3]})";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 8);
+    CHECK(tokens->at(0).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(1).tokenType == jsp::KEY);
+    CHECK(tokens->at(2).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(3).tokenType == jsp::VALUE_NUMBER);
+    CHECK(tokens->at(4).tokenType == jsp::VALUE_NUMBER);
+    CHECK(tokens->at(5).tokenType == jsp::VALUE_NUMBER);
+    CHECK(tokens->at(6).tokenType == jsp::ARRAY_END);
+    CHECK(tokens->at(7).tokenType == jsp::OBJECT_END);
+}
+
+TEST_CASE("check array of arrays") {
+
+    const std::string json = R"([[],[],[]])";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 8);
+    CHECK(tokens->at(0).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(1).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(2).tokenType == jsp::ARRAY_END);
+    CHECK(tokens->at(3).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(4).tokenType == jsp::ARRAY_END);
+    CHECK(tokens->at(5).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(6).tokenType == jsp::ARRAY_END);
+    CHECK(tokens->at(7).tokenType == jsp::ARRAY_END);
+}
+
+TEST_CASE("check nested object") {
+
+    const std::string json = R"({ "obj": { "nested" : true } })";
+    auto tokens = lexer.scan(json);
+
+    REQUIRE(tokens->size() == 7);
+    CHECK(tokens->at(0).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(1).tokenType == jsp::KEY);
+    CHECK(tokens->at(2).tokenType == jsp::OBJECT_BEGIN);
+    CHECK(tokens->at(3).tokenType == jsp::KEY);
+    CHECK(tokens->at(4).tokenType == jsp::LITERAL_TRUE);
+    CHECK(tokens->at(5).tokenType == jsp::OBJECT_END);
+    CHECK(tokens->at(6).tokenType == jsp::OBJECT_END);
 }

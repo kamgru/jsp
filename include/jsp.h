@@ -14,9 +14,9 @@ namespace jsp {
         ARRAY_END,
         VALUE_STRING,
         VALUE_NUMBER,
-        VALUE_TRUE,
-        VALUE_FALSE,
-        VALUE_NULL,
+        LITERAL_TRUE,
+        LITERAL_FALSE,
+        LITERAL_NULL,
         KEY,
         UNKNOWN
     };

@@ -11,6 +11,13 @@ bool Cursor::advance() {
     return m_index < m_input.length();
 }
 
+void Cursor::rewind() {
+    m_index -= 1;
+    if (m_index < 0) {
+        m_index = 0;
+    }
+}
+
 char Cursor::getValue() {
     return m_input[m_index];
 }
