@@ -79,6 +79,6 @@ JNode* Parser::parse(const std::string &json) {
     auto tokens = scanner.scan(json);
     TokenIterator tokenIterator(tokens->begin(), tokens->end());
 
-    JNode* node = parseObject(tokenIterator, json);
+    JNode* node = parseNode(tokenIterator, json);
     return node;
 }

@@ -34,7 +34,7 @@ namespace jsp {
 
     class Scanner {
     public:
-        std::unique_ptr<std::vector<Token>> scan(std::string const &input);
+        std::unique_ptr<std::vector<Token>> scan(std::string const& input);
     };
 
     enum JNODE_TYPE {
@@ -49,8 +49,8 @@ namespace jsp {
     class JNode {
     public:
         JNode(JNODE_TYPE type) : type(type) {}
-
-        virtual ~JNode() {};
+        virtual ~JNode() {}
+        
         const JNODE_TYPE type;
     };
 
@@ -59,6 +59,13 @@ namespace jsp {
         JObject(std::map<std::string, JNode*> nodes)
                 : JNode(OBJECT_NODE),
                   m_nodes(nodes) {}
+
+        ~JObject() {
+            for (auto pair : m_nodes) {
+                delete pair.second;
+            }
+            m_nodes.clear();
+        }
 
         JNode* get(std::string key) {
             return m_nodes.at(key);
@@ -70,7 +77,7 @@ namespace jsp {
 
     class JStringNode : public JNode {
     public:
-        JStringNode(std::string const &value)
+        JStringNode(std::string const& value)
                 : JNode(STRING_NODE),
                   value(value) {}
 
@@ -107,7 +114,7 @@ namespace jsp {
 
     class Parser {
     public:
-        JNode* parse(std::string const &json);
+        JNode* parse(std::string const& json);
     };
 }
 

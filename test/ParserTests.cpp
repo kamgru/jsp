@@ -22,6 +22,6 @@ TEST_CASE("check simple object") {
     JObject result = static_cast<JObject&>(*node);
     JNode* value = result.get("key");
 
-    JStringNode s = static_cast<JStringNode&>(*value);
-    CHECK(s.value == "value");
+    JStringNode stringNode = static_cast<JStringNode&>(*value);
+    CHECK(stringNode.value == "value");
 }
