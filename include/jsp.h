@@ -2,6 +2,7 @@
 #define JSP_JSP_H
 
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
@@ -36,6 +37,78 @@ namespace jsp {
         std::unique_ptr<std::vector<Token>> scan(std::string const &input);
     };
 
+    enum JNODE_TYPE {
+        OBJECT_NODE,
+        ARRAY_NODE,
+        STRING_NODE,
+        NUMBER_NODE,
+        BOOL_NODE,
+        NULL_NODE
+    };
+
+    class JNode {
+    public:
+        JNode(JNODE_TYPE type) : type(type) {}
+
+        virtual ~JNode() {};
+        const JNODE_TYPE type;
+    };
+
+    class JObject : public JNode {
+    public:
+        JObject(std::map<std::string, JNode*> nodes)
+                : JNode(OBJECT_NODE),
+                  m_nodes(nodes) {}
+
+        JNode* get(std::string key) {
+            return m_nodes.at(key);
+        }
+
+    private:
+        std::map<std::string, JNode*> m_nodes;
+    };
+
+    class JStringNode : public JNode {
+    public:
+        JStringNode(std::string const &value)
+                : JNode(STRING_NODE),
+                  value(value) {}
+
+        const std::string value;
+    };
+
+    class JNumberNode : public JNode {
+    public:
+        JNumberNode(double value)
+                : JNode(NUMBER_NODE),
+                  value(value) {}
+
+        const double value;
+    };
+
+    class JBoolNode : public JNode {
+    public:
+        JBoolNode(bool value)
+                : JNode(BOOL_NODE),
+                  value(value) {}
+
+        const bool value;
+    };
+
+    class JNullNode : public JNode {
+    public:
+        JNullNode() : JNode(NULL_NODE) {}
+    };
+
+    class JArrayNode : public JNode {
+    public:
+        JArrayNode() : JNode(ARRAY_NODE) {}
+    };
+
+    class Parser {
+    public:
+        JNode* parse(std::string const &json);
+    };
 }
 
 #endif
