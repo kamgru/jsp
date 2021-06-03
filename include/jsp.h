@@ -34,15 +34,13 @@ namespace jsp {
 
     class Scanner {
     public:
-        std::unique_ptr<std::vector<Token>> scan(std::string const& input);
+        std::unique_ptr<std::vector<Token>> scan(std::string const &input);
     };
 
     enum JNODE_TYPE {
         OBJECT_NODE,
         ARRAY_NODE,
-        STRING_NODE,
-        NUMBER_NODE,
-        BOOL_NODE,
+        VALUE_NODE,
         NULL_NODE
     };
 
@@ -50,7 +48,7 @@ namespace jsp {
     public:
         JNode(JNODE_TYPE type) : type(type) {}
         virtual ~JNode() {}
-        
+
         const JNODE_TYPE type;
     };
 
@@ -67,44 +65,23 @@ namespace jsp {
             m_nodes.clear();
         }
 
-        JNode* get(std::string key) {
+        JNode *get(std::string key) {
             return m_nodes.at(key);
         }
+
+        template<class T>
+        T get(std::string key);
 
     private:
         std::map<std::string, JNode*> m_nodes;
     };
 
-    class JStringNode : public JNode {
+    template<class T>
+    class JValue : public JNode {
     public:
-        JStringNode(std::string const& value)
-                : JNode(STRING_NODE),
-                  value(value) {}
+        JValue(T value) : JNode(VALUE_NODE), value(value) {}
 
-        const std::string value;
-    };
-
-    class JNumberNode : public JNode {
-    public:
-        JNumberNode(double value)
-                : JNode(NUMBER_NODE),
-                  value(value) {}
-
-        const double value;
-    };
-
-    class JBoolNode : public JNode {
-    public:
-        JBoolNode(bool value)
-                : JNode(BOOL_NODE),
-                  value(value) {}
-
-        const bool value;
-    };
-
-    class JNullNode : public JNode {
-    public:
-        JNullNode() : JNode(NULL_NODE) {}
+        const T value;
     };
 
     class JArrayNode : public JNode {
@@ -114,7 +91,7 @@ namespace jsp {
 
     class Parser {
     public:
-        JNode* parse(std::string const& json);
+        JNode *parse(std::string const &json);
     };
 }
 

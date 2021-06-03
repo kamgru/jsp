@@ -35,9 +35,9 @@ private:
 
 JNode* parseNode(TokenIterator &iterator, std::string const &input);
 
-JStringNode* parseString(TokenIterator &iterator, std::string const &input) {
+JValue<std::string>* parseString(TokenIterator &iterator, std::string const &input) {
     std::string value = input.substr(iterator.index(), iterator.length());
-    return new JStringNode(value);
+    return new JValue<std::string>(value);
 }
 
 JObject* parseObject(TokenIterator &iterator, std::string const &input) {
@@ -51,7 +51,7 @@ JObject* parseObject(TokenIterator &iterator, std::string const &input) {
         }
 
         if (tokenType == KEY) {
-            JStringNode *keyNode = parseString(iterator, input);
+            JValue<std::string> *keyNode = parseString(iterator, input);
             iterator.MoveNext();
             JNode *valueNode = parseNode(iterator, input);
             nodes.emplace(keyNode->value, valueNode);
@@ -61,7 +61,11 @@ JObject* parseObject(TokenIterator &iterator, std::string const &input) {
     return new JObject(nodes);
 }
 
-
+JValue<double>* parseNumber(TokenIterator &iterator, std::string const &input) {
+    std::string value = input.substr(iterator.index(), iterator.length());
+    double number = std::stod(value);
+    return new JValue<double>(number);
+}
 
 JNode* parseNode(TokenIterator &iterator, std::string const &input) {
     if (iterator.tokenType() == OBJECT_BEGIN) {
@@ -70,6 +74,18 @@ JNode* parseNode(TokenIterator &iterator, std::string const &input) {
 
     if (iterator.tokenType() == VALUE_STRING) {
         return parseString(iterator, input);
+    }
+
+    if (iterator.tokenType() == VALUE_NUMBER) {
+        return parseNumber(iterator, input);
+    }
+
+    if (iterator.tokenType() == LITERAL_TRUE) {
+        return new JValue<bool>(true);
+    }
+
+    if (iterator.tokenType() == LITERAL_FALSE) {
+        return new JValue<bool>(false);
     }
 }
 
