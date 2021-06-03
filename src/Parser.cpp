@@ -2,98 +2,107 @@
 
 using namespace jsp;
 
-class TokenEnumerator {
-public:
-    TokenEnumerator(std::vector<Token>::iterator begin, std::vector<Token>::iterator end)
-            : m_iterator(begin), m_end(end) {}
+namespace jspInternal {
 
-    bool MoveNext() {
-        if (m_iterator != m_end) {
-            m_iterator++;
-            return true;
+    class TokenEnumerator {
+    public:
+        TokenEnumerator(std::vector<Token>::iterator begin, std::vector<Token>::iterator end)
+                : m_iterator(begin), m_end(end) {}
+
+        bool MoveNext() {
+            if (m_iterator != m_end) {
+                m_iterator++;
+                return true;
+            }
+
+            return false;
         }
 
-        return false;
+        TOKEN_TYPE tokenType() { return m_iterator->tokenType; }
+        unsigned int index() { return m_iterator->index; }
+        unsigned int length() { return m_iterator->length; }
+
+    private:
+        std::vector<Token>::iterator m_iterator;
+        std::vector<Token>::iterator m_end;
+    };
+
+    JNode *parseNode(TokenEnumerator &enumerator, std::string const &input);
+
+    JValue<std::string> *parseString(TokenEnumerator &enumerator, std::string const &input) {
+        std::string value = input.substr(enumerator.index(), enumerator.length());
+        return new JValue<std::string>(value);
     }
 
-    TOKEN_TYPE tokenType() {
-        return m_iterator->tokenType;
-    }
+    JObject *parseObject(TokenEnumerator &enumerator, std::string const &input) {
 
-    unsigned int index() {
-        return m_iterator->index;
-    }
+        std::map<std::string, JNode *> nodes;
+        while (enumerator.MoveNext()) {
+            TOKEN_TYPE tokenType = enumerator.tokenType();
 
-    unsigned int length() {
-        return m_iterator->length;
-    }
+            if (tokenType == OBJECT_END) {
+                break;
+            }
 
-private:
-    std::vector<Token>::iterator m_iterator;
-    std::vector<Token>::iterator m_end;
-};
-
-JNode* parseNode(TokenEnumerator &enumerator, std::string const &input);
-
-JValue<std::string>* parseString(TokenEnumerator &enumerator, std::string const &input) {
-    std::string value = input.substr(enumerator.index(), enumerator.length());
-    return new JValue<std::string>(value);
-}
-
-JObject* parseObject(TokenEnumerator &enumerator, std::string const &input) {
-
-    std::map<std::string, JNode*> nodes;
-    while (enumerator.MoveNext()) {
-        TOKEN_TYPE tokenType = enumerator.tokenType();
-
-        if (tokenType == OBJECT_END) {
-            break;
+            if (tokenType == KEY) {
+                JValue<std::string> *keyNode = parseString(enumerator, input);
+                enumerator.MoveNext();
+                JNode *valueNode = parseNode(enumerator, input);
+                nodes.emplace(keyNode->value, valueNode);
+            }
         }
 
-        if (tokenType == KEY) {
-            JValue<std::string> *keyNode = parseString(enumerator, input);
-            enumerator.MoveNext();
-            JNode *valueNode = parseNode(enumerator, input);
-            nodes.emplace(keyNode->value, valueNode);
+        return new JObject(nodes);
+    }
+
+    JValue<double> *parseNumber(TokenEnumerator &enumerator, std::string const &input) {
+        std::string value = input.substr(enumerator.index(), enumerator.length());
+        double number = std::stod(value);
+        return new JValue<double>(number);
+    }
+
+    JNode *parseNode(TokenEnumerator &enumerator, std::string const &input) {
+        if (enumerator.tokenType() == OBJECT_BEGIN) {
+            return parseObject(enumerator, input);
         }
-    }
 
-    return new JObject(nodes);
+        if (enumerator.tokenType() == VALUE_STRING) {
+            return parseString(enumerator, input);
+        }
+
+        if (enumerator.tokenType() == VALUE_NUMBER) {
+            return parseNumber(enumerator, input);
+        }
+
+        if (enumerator.tokenType() == LITERAL_TRUE) {
+            return new JValue<bool>(true);
+        }
+
+        if (enumerator.tokenType() == LITERAL_FALSE) {
+            return new JValue<bool>(false);
+        }
+
+        return new JEmpty();
+    }
 }
 
-JValue<double>* parseNumber(TokenEnumerator &enumerator, std::string const &input) {
-    std::string value = input.substr(enumerator.index(), enumerator.length());
-    double number = std::stod(value);
-    return new JValue<double>(number);
-}
-
-JNode* parseNode(TokenEnumerator &enumerator, std::string const &input) {
-    if (enumerator.tokenType() == OBJECT_BEGIN) {
-        return parseObject(enumerator, input);
+JObject* Parser::parseObject(const std::string &json) {
+    Scanner scanner;
+    auto tokens = scanner.scan(json);
+    if (tokens->size() == 0 || tokens->front().tokenType != OBJECT_BEGIN) {
+        return nullptr;
     }
 
-    if (enumerator.tokenType() == VALUE_STRING) {
-        return parseString(enumerator, input);
-    }
+    jspInternal::TokenEnumerator enumerator(tokens->begin(), tokens->end());
+    JObject* jObject = jspInternal::parseObject(enumerator, json);
 
-    if (enumerator.tokenType() == VALUE_NUMBER) {
-        return parseNumber(enumerator, input);
-    }
-
-    if (enumerator.tokenType() == LITERAL_TRUE) {
-        return new JValue<bool>(true);
-    }
-
-    if (enumerator.tokenType() == LITERAL_FALSE) {
-        return new JValue<bool>(false);
-    }
+    return jObject;
 }
 
 JNode* Parser::parse(const std::string &json) {
-
     Scanner scanner;
     auto tokens = scanner.scan(json);
-    TokenEnumerator enumerator(tokens->begin(), tokens->end());
+    jspInternal::TokenEnumerator enumerator(tokens->begin(), tokens->end());
 
     JNode* node = parseNode(enumerator, json);
     return node;

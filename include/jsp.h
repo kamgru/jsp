@@ -47,6 +47,7 @@ namespace jsp {
     class JNode {
     public:
         JNode(JNODE_TYPE type) : type(type) {}
+
         virtual ~JNode() {}
 
         const JNODE_TYPE type;
@@ -54,7 +55,7 @@ namespace jsp {
 
     class JObject : public JNode {
     public:
-        JObject(std::map<std::string, JNode*> nodes)
+        JObject(std::map<std::string, JNode *> nodes)
                 : JNode(OBJECT_NODE),
                   m_nodes(nodes) {}
 
@@ -65,15 +66,16 @@ namespace jsp {
             m_nodes.clear();
         }
 
-        JNode *get(std::string key) {
-            return m_nodes.at(key);
-        }
-
         template<class T>
-        T get(std::string key);
+        const T &get(std::string key);
 
     private:
-        std::map<std::string, JNode*> m_nodes;
+        std::map<std::string, JNode *> m_nodes;
+    };
+
+    class JEmpty : public JNode {
+    public:
+        JEmpty() : JNode(NULL_NODE) {}
     };
 
     template<class T>
@@ -84,13 +86,31 @@ namespace jsp {
         const T value;
     };
 
-    class JArrayNode : public JNode {
+    class JArray : public JNode {
     public:
-        JArrayNode() : JNode(ARRAY_NODE) {}
+        JArray(std::vector<JNode *> nodes)
+                : JNode(ARRAY_NODE), m_nodes(nodes) {}
+
+        ~JArray() {
+            for (auto node : m_nodes) {
+                delete node;
+            }
+            m_nodes.clear();
+        }
+
+        template<class T>
+        const T &at(unsigned int index) {
+            return m_nodes[index];
+        }
+
+    private:
+        std::vector<JNode *> m_nodes;
     };
 
     class Parser {
     public:
+        JObject *parseObject(std::string const &json);
+
         JNode *parse(std::string const &json);
     };
 }
