@@ -109,6 +109,18 @@ namespace jspInternal {
     }
 }
 
+JArray* Parser::parseArray(const std::string& json) {
+    Scanner scanner;
+    auto tokens = scanner.scan(json);
+    if (tokens->size() == 0 || tokens->front().tokenType != ARRAY_BEGIN) {
+        return nullptr;
+    }
+
+    jspInternal::TokenEnumerator enumerator(tokens->begin(), tokens->end());
+    JArray* jArray = jspInternal::parseArray(enumerator, json);
+
+    return jArray;
+}
 
 JObject* Parser::parseObject(const std::string& json) {
     Scanner scanner;

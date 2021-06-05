@@ -75,9 +75,34 @@ TEST_CASE("check array with simple values") {
     auto result = parser.parse(json);
     auto array = static_cast<JArray*>(result);
 
-    double v= (*array)[0];
-    std::string value = (*array)[1];
+    double first = (*array)[0];
+    std::string second = (*array)[1];
+    bool third = (*array)[2];
 
-    CHECK(v == 1);
+    CHECK(first == 1);
+    CHECK(second == "value");
+    CHECK(third == true);
+}
+
+TEST_CASE("check object with array property") {
+    const std::string json = R"({ "key": ["value", null]  })";
+
+    auto result = parser.parseObject(json);
+    auto array = result->get<JArray>("key");
+
+    std::string first = array[0];
+    JEmpty second = array[1];
+    CHECK(first == "value");
+    CHECK(second.type == EMPTY_NODE);
+}
+
+TEST_CASE("check array with object") {
+    const std::string json = R"( [{"key":"value"}] )";
+
+    auto result = parser.parseArray(json);
+
+    JObject jObject = (*result)[0];
+    auto value = jObject.get<std::string>("key");
+
     CHECK(value == "value");
 }

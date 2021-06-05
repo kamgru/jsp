@@ -38,3 +38,9 @@ const JEmpty& JObject::get<JEmpty>(std::string key) {
     auto node = static_cast<JEmpty*>(m_nodes[key]);
     return *node;
 }
+
+template<>
+const JArray& JObject::get<JArray>(std::string key) {
+    auto node = static_cast<JArray*>(m_nodes[key]);
+    return *node;
+}

@@ -114,10 +114,7 @@ namespace jsp {
         }
 
         template<class T>
-        const T& at(unsigned int index) {
-            auto node = static_cast<JValue<T>*>(m_nodes[index]);
-            return node->value;
-        }
+        const T& at(unsigned int index);
 
         Proxy operator[](unsigned int index) { return Proxy(this, index); };
 
@@ -131,6 +128,7 @@ namespace jsp {
     class Parser {
     public:
         JObject* parseObject(std::string const& json);
+        JArray* parseArray(std::string const& json);
         JNode* parse(std::string const& json);
     };
 }
