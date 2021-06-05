@@ -38,7 +38,13 @@ namespace jsp {
         template<class T>
         const T& at(unsigned int index);
 
-        Proxy operator[](unsigned int index) { return Proxy(this, index); };
+        Proxy operator[](unsigned int index) {
+            return Proxy(this, index);
+        }
+
+        size_t size() {
+            return m_nodes.size();
+        }
 
     private:
         std::vector<JNode*> m_nodes;

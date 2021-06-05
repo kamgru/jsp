@@ -96,13 +96,3 @@ TEST_CASE("check object with array property") {
     CHECK(second.type == EMPTY_NODE);
 }
 
-TEST_CASE("check array with object") {
-    const std::string json = R"( [{"key":"value"}] )";
-
-    auto result = parser.parseArray(json);
-
-    JObject jObject = (*result)[0];
-    auto value = jObject.get<std::string>("key");
-
-    CHECK(value == "value");
-}
