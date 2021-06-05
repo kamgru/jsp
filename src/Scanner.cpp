@@ -72,19 +72,19 @@ Token getNumberToken(Cursor &cursor) {
 
 Token getNullToken(Cursor &cursor) {
     Token token { cursor.getIndex(), 4, LITERAL_NULL };
-    cursor.offset(4);
+    cursor.offset(3);
     return token;
 }
 
 Token getTrueToken(Cursor &cursor) {
     Token token { cursor.getIndex(), 4, LITERAL_TRUE };
-    cursor.offset(4);
+    cursor.offset(3);
     return token;
 }
 
 Token getFalseToken(Cursor &cursor) {
     Token token { cursor.getIndex(), 5, LITERAL_FALSE };
-    cursor.offset(5);
+    cursor.offset(4);
     return token;
 }
 

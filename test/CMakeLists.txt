@@ -1,3 +1,6 @@
 add_executable(all_tests
-        ScannerTests.cpp)
+        TestMain.cpp
+        ScannerTests.cpp
+        ParserTests.cpp)
+
 target_link_libraries(all_tests jsp)
