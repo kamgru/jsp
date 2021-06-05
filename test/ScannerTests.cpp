@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_USE_STD_HEADERS
 
 #include "doctest.h"
-#include "../include/jsp.h"
+#include "../include/jsp_scanner.h"
 
 jsp::Scanner scanner;
 

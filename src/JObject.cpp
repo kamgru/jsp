@@ -1,4 +1,5 @@
-#include "../include/jsp.h"
+#include "../include/jsp_jobject.h"
+#include "../include/jsp_jarray.h"
 
 using namespace jsp;
 

@@ -1,10 +1,10 @@
 #include "Cursor.h"
 
-using namespace jsp;
+using namespace jsp::internal;
 
 Cursor::Cursor(const std::string &input)
-    : m_input(input), m_index(0) {
-}
+    : m_input(input),
+    m_index(0) { }
 
 bool Cursor::advance() {
     m_index += 1;

@@ -1,26 +1,48 @@
-#include "../include/jsp.h"
+#include "../include/jsp_scanner.h"
 #include "Cursor.h"
 #include <memory>
 
 using namespace jsp;
+using namespace jsp::internal;
 
-Token getObjectStartToken(Cursor &cursor) {
+Token getNextToken(Cursor& cursor);
+
+std::unique_ptr<std::vector<Token>> Scanner::scan(const std::string& input) {
+
+    Cursor cursor(input);
+    auto tokens = std::make_unique<std::vector<Token>>();
+    do {
+
+        char currentValue = cursor.getValue();
+        if (currentValue == ' '
+            || currentValue == ':'
+            || currentValue == ',') {
+            continue;
+        }
+
+        tokens->emplace_back(getNextToken(cursor));
+
+    } while (cursor.advance());
+    return tokens;
+}
+
+Token getObjectStartToken(Cursor& cursor) {
     return { cursor.getIndex(), 1, OBJECT_BEGIN };
 }
 
-Token getObjectEndToken(Cursor &cursor) {
+Token getObjectEndToken(Cursor& cursor) {
     return { cursor.getIndex(), 1, OBJECT_END };
 }
 
-Token getArrayStartToken(Cursor &cursor) {
+Token getArrayStartToken(Cursor& cursor) {
     return { cursor.getIndex(), 1, ARRAY_BEGIN };
 }
 
-Token getArrayEndToken(Cursor &cursor) {
+Token getArrayEndToken(Cursor& cursor) {
     return { cursor.getIndex(), 1, ARRAY_END };
 }
 
-Token getStringToken(Cursor &cursor) {
+Token getStringToken(Cursor& cursor) {
     unsigned int currentIndex = cursor.getIndex();
     unsigned int length = 0;
     char currentValue = cursor.getValue();
@@ -55,7 +77,8 @@ bool isJsonNumberChar(char value) {
            || value == '.';
 }
 
-Token getNumberToken(Cursor &cursor) {
+Token getNumberToken(Cursor& cursor) {
+
     unsigned int startIndex = cursor.getIndex();
 
     do {
@@ -70,25 +93,29 @@ Token getNumberToken(Cursor &cursor) {
     return { startIndex, cursor.getIndex() - startIndex + 1, VALUE_NUMBER };
 }
 
-Token getNullToken(Cursor &cursor) {
+Token getNullToken(Cursor& cursor) {
+
     Token token { cursor.getIndex(), 4, LITERAL_NULL };
     cursor.offset(3);
     return token;
 }
 
-Token getTrueToken(Cursor &cursor) {
+Token getTrueToken(Cursor& cursor) {
+
     Token token { cursor.getIndex(), 4, LITERAL_TRUE };
     cursor.offset(3);
     return token;
 }
 
-Token getFalseToken(Cursor &cursor) {
+Token getFalseToken(Cursor& cursor) {
+
     Token token { cursor.getIndex(), 5, LITERAL_FALSE };
     cursor.offset(4);
     return token;
 }
 
-Token getNextToken(Cursor &cursor) {
+Token getNextToken(Cursor& cursor) {
+
     char currentValue = cursor.getValue();
 
     switch (currentValue) {
@@ -110,22 +137,4 @@ Token getNextToken(Cursor &cursor) {
     }
 
     return { cursor.getIndex(), 0, UNKNOWN };
-}
-
-std::unique_ptr<std::vector<Token>> Scanner::scan(const std::string &input) {
-    Cursor cursor(input);
-    auto tokens = std::make_unique<std::vector<Token>>();
-    do {
-
-        char currentValue = cursor.getValue();
-        if (currentValue == ' '
-            || currentValue == ':'
-            || currentValue == ',') {
-            continue;
-        }
-
-        tokens->emplace_back(getNextToken(cursor));
-
-    } while (cursor.advance());
-    return tokens;
 }

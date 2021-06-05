@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace jsp {
+namespace jsp { namespace internal {
 
     class Cursor {
     public:
@@ -18,7 +18,6 @@ namespace jsp {
         unsigned int m_index;
         const std::string& m_input;
     };
-}
-
+}}
 
 #endif
