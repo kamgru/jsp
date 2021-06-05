@@ -2,6 +2,13 @@
 
 using namespace jsp;
 
+JObject::~JObject()  {
+    for (auto pair : m_nodes) {
+        delete pair.second;
+    }
+    m_nodes.clear();
+}
+
 template<>
 const std::string& JObject::get<std::string>(std::string key) {
     auto node = static_cast<JValue<std::string>*>(m_nodes[key]);

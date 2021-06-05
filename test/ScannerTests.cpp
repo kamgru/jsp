@@ -247,3 +247,18 @@ TEST_CASE("check nested object") {
     CHECK(tokens->at(5).tokenType == jsp::OBJECT_END);
     CHECK(tokens->at(6).tokenType == jsp::OBJECT_END);
 }
+
+TEST_CASE("check array of simple values") {
+
+    const std::string json = R"([1, "value", true, false, null])";
+    auto tokens = scanner.scan(json);
+
+    REQUIRE(tokens->size() == 7);
+    CHECK(tokens->at(0).tokenType == jsp::ARRAY_BEGIN);
+    CHECK(tokens->at(1).tokenType == jsp::VALUE_NUMBER);
+    CHECK(tokens->at(2).tokenType == jsp::VALUE_STRING);
+    CHECK(tokens->at(3).tokenType == jsp::LITERAL_TRUE);
+    CHECK(tokens->at(4).tokenType == jsp::LITERAL_FALSE);
+    CHECK(tokens->at(5).tokenType == jsp::LITERAL_NULL);
+    CHECK(tokens->at(6).tokenType == jsp::ARRAY_END);
+}

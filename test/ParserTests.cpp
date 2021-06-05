@@ -56,7 +56,7 @@ TEST_CASE("check object with null property") {
     auto resut = parser.parseObject(json);
     auto value = resut->get<JEmpty>("key");
 
-    CHECK(value.type == NULL_NODE);
+    CHECK(value.type == EMPTY_NODE);
 }
 
 TEST_CASE("check nested object") {
@@ -66,5 +66,18 @@ TEST_CASE("check nested object") {
     auto nested = result->get<JObject>("key");
     auto value = nested.get<std::string>("nested");
 
+    CHECK(value == "value");
+}
+
+TEST_CASE("check array with simple values") {
+    const std::string json = R"([1, "value", true])";
+
+    auto result = parser.parse(json);
+    auto array = static_cast<JArray*>(result);
+
+    double v= (*array)[0];
+    std::string value = (*array)[1];
+
+    CHECK(v == 1);
     CHECK(value == "value");
 }

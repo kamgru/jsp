@@ -34,14 +34,14 @@ namespace jsp {
 
     class Scanner {
     public:
-        std::unique_ptr<std::vector<Token>> scan(std::string const &input);
+        std::unique_ptr<std::vector<Token>> scan(std::string const& input);
     };
 
     enum JNODE_TYPE {
         OBJECT_NODE,
         ARRAY_NODE,
         VALUE_NODE,
-        NULL_NODE
+        EMPTY_NODE
     };
 
     class JNode {
@@ -55,27 +55,22 @@ namespace jsp {
 
     class JObject : public JNode {
     public:
-        JObject(std::map<std::string, JNode *> nodes)
+        JObject(std::map<std::string, JNode*> nodes)
                 : JNode(OBJECT_NODE),
                   m_nodes(nodes) {}
 
-        ~JObject() {
-            for (auto pair : m_nodes) {
-                delete pair.second;
-            }
-            m_nodes.clear();
-        }
+        ~JObject();
 
         template<class T>
-        const T &get(std::string key);
+        const T& get(std::string key);
 
     private:
-        std::map<std::string, JNode *> m_nodes;
+        std::map<std::string, JNode*> m_nodes;
     };
 
     class JEmpty : public JNode {
     public:
-        JEmpty() : JNode(NULL_NODE) {}
+        JEmpty() : JNode(EMPTY_NODE) {}
     };
 
     template<class T>
@@ -86,9 +81,29 @@ namespace jsp {
         const T value;
     };
 
+    class JArray;
+
+
     class JArray : public JNode {
     public:
-        JArray(std::vector<JNode *> nodes)
+
+        class Proxy {
+        public:
+            Proxy(JArray* jArray, unsigned int index)
+                    : m_jArray(jArray), m_index(index) {}
+
+            template<class T>
+            operator T() {
+                return m_jArray->at<T>(m_index);
+            }
+
+        private:
+            unsigned int m_index;
+            JArray* m_jArray;
+        };
+
+
+        JArray(std::vector<JNode*> nodes)
                 : JNode(ARRAY_NODE), m_nodes(nodes) {}
 
         ~JArray() {
@@ -99,19 +114,24 @@ namespace jsp {
         }
 
         template<class T>
-        const T &at(unsigned int index) {
-            return m_nodes[index];
+        const T& at(unsigned int index) {
+            auto node = static_cast<JValue<T>*>(m_nodes[index]);
+            return node->value;
         }
 
+        Proxy operator[](unsigned int index) { return Proxy(this, index); };
+
     private:
-        std::vector<JNode *> m_nodes;
+        std::vector<JNode*> m_nodes;
     };
+
+
+
 
     class Parser {
     public:
-        JObject *parseObject(std::string const &json);
-
-        JNode *parse(std::string const &json);
+        JObject* parseObject(std::string const& json);
+        JNode* parse(std::string const& json);
     };
 }
 
