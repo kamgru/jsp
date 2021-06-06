@@ -9,9 +9,9 @@ namespace jsp {
     class JArray : public JNode {
     public:
 
-        class Proxy {
+        class ProxyElement {
         public:
-            Proxy(JArray* jArray, unsigned int index)
+            ProxyElement(JArray* jArray, unsigned int index)
                     : m_jArray(jArray), m_index(index) {}
 
             template<class T>
@@ -38,8 +38,8 @@ namespace jsp {
         template<class T>
         const T& at(unsigned int index);
 
-        Proxy operator[](unsigned int index) {
-            return Proxy(this, index);
+        ProxyElement operator[](unsigned int index) {
+            return ProxyElement(this, index);
         }
 
         size_t size() {

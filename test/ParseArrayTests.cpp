@@ -77,4 +77,24 @@ TEST_SUITE("Parser::parseArray") {
             CHECK(name == expectedNames[i]);
         }
     }
+
+    TEST_CASE("array with true false") {
+        const std::string json = R"([true, false])";
+
+        auto result = parser.parseArray(json);
+
+        bool first = (*result)[0];
+        bool second = (*result)[1];
+
+        CHECK(first == true);
+        CHECK(second == false);
+    }
+
+    TEST_CASE("array with null") {
+        const std::string json = R"([null])";
+
+        auto result = parser.parseArray(json);
+
+        CHECK(result->at<JEmpty>(0).type == EMPTY_NODE);
+    }
 }
